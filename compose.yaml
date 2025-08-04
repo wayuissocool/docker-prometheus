@@ -1,0 +1,72 @@
+name: "monitoring"
+services:
+  prometheus:
+    depends_on:
+      adguard:
+        condition: "service_healthy"
+        restart: true
+    image: "11notes/prometheus:3.5.0"
+    read_only: true
+    environment:
+      TZ: "Europe/Zurich"
+      PROMETHEUS_CONFIG: |-
+        global:
+          scrape_interval: 1s
+
+        scrape_configs:
+          - job_name: "dnspyre"
+            static_configs:
+              - targets: ["dnspyre:3000"]
+    volumes:
+      - "prometheus.etc:/prometheus/etc"
+      - "prometheus.var:/prometheus/var"
+    ports:
+      - "3000:3000/tcp"
+    networks:
+      frontend:
+    restart: "always"
+
+  # this image will execute 100k queries against adguard to fill your Prometheus with some data
+  dnspyre:
+    depends_on:
+      prometheus:
+        condition: "service_healthy"
+        restart: true
+    image: "11notes/distroless:dnspyre"
+    command: "--server adguard -c 10 -n 3 -t A --prometheus ':3000' https://raw.githubusercontent.com/11notes/static/refs/heads/main/src/benchmarks/dns/fqdn/10000"
+    read_only: true
+    environment:
+      TZ: "Europe/Zurich"
+    networks:
+      frontend:
+
+  adguard:
+    image: "11notes/adguard:0.107.64"
+    read_only: true
+    environment:
+      TZ: "Europe/Zurich"
+    volumes:
+      - "adguard.etc:/adguard/etc"
+      - "adguard.var:/adguard/var"
+    tmpfs:
+      # tmpfs volume because of read_only: true
+      - "/adguard/run:uid=1000,gid=1000"
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+      - "3010:3000/tcp"
+    networks:
+      frontend:
+    sysctls:
+      # allow rootless container to access ports < 1024
+      net.ipv4.ip_unprivileged_port_start: 53
+    restart: "always"
+
+volumes:
+  prometheus.etc:
+  prometheus.var:
+  adguard.etc:
+  adguard.var:
+
+networks:
+  frontend:
