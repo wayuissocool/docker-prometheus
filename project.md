@@ -1,6 +1,6 @@
 ${{ image: Graph.png }}
 
-${{ content_synopsis }} This image will run Prometheus [rootless](https://github.com/11notes/RTFM/blob/main/linux/container/image/rootless.md) and [distroless](https://github.com/11notes/RTFM/blob/main/linux/container/image/distroless.md), for maximum security and performance.
+${{ content_synopsis }} This image will run Prometheus [rootless](https://github.com/11notes/RTFM/blob/main/linux/container/image/rootless.md) and [distroless](https://github.com/11notes/RTFM/blob/main/linux/container/image/distroless.md), for maximum security and performance. You can either provide your own config file or configure Prometheus directly inline in your compose.
 
 ${{ content_uvp }} Good question! Because ...
 
