@@ -24,6 +24,8 @@ ${{ include: ./rootfs/prometheus/etc/default.yml }}
 ```
 
 ${{ title_volumes }}
+* **${{ json_root }}/etc** - Directory of your config
+* **${{ json_root }}/var** - Directory of all dynamic data and database
 
 ${{ content_compose }}
 
