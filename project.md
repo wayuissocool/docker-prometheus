@@ -1,4 +1,4 @@
-${{ image: Dashboard.png }}
+${{ image: Graph.png }}
 
 ${{ content_synopsis }} This image will run Prometheus [rootless](https://github.com/11notes/RTFM/blob/main/linux/container/image/rootless.md) and [distroless](https://github.com/11notes/RTFM/blob/main/linux/container/image/distroless.md), for maximum security and performance.
 
