@@ -34,7 +34,7 @@ Below you find a comparison between this image and the most used or original one
 
 | **image** | 11notes/prometheus:3.5.0 | prom/prometheus |
 | ---: | :---: | :---: |
-| **image size on disk** | 25.9MB | 313MB |
+| **image size on disk** | 25.8MB | 313MB |
 | **process UID/GID** | 1000/1000 | 65534/65534 |
 | **distroless?** | ✅ | ❌ |
 | **rootless?** | ✅ | ✅ |
@@ -184,4 +184,4 @@ docker pull quay.io/11notes/prometheus:3.5.0
 # ElevenNotes™️
 This image is provided to you at your own risk. Always make backups before updating an image to a different version. Check the [releases](https://github.com/11notes/docker-prometheus/releases) for breaking changes. If you have any problems with using this image simply raise an [issue](https://github.com/11notes/docker-prometheus/issues), thanks. If you have a question or inputs please create a new [discussion](https://github.com/11notes/docker-prometheus/discussions) instead of an issue. You can find all my other repositories on [github](https://github.com/11notes?tab=repositories).
 
-*created 05.08.2025, 06:01:48 (CET)*
+*created 05.08.2025, 23:47:00 (CET)*
