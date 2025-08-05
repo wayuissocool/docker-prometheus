@@ -10,7 +10,7 @@
 
 # :: FOREIGN IMAGES
   FROM 11notes/distroless AS distroless
-  FROM 11notes/distroless:curl AS distroless-curl
+  FROM 11notes/distroless:localhealth AS distroless-localhealth
   FROM 11notes/util AS util
 
 # ╔═════════════════════════════════════════════════════╗
@@ -88,7 +88,7 @@
 
   # :: multi-stage
     COPY --from=distroless / /
-    COPY --from=distroless-curl / /
+    COPY --from=distroless-localhealth / /
     COPY --from=build /distroless/ /
     COPY --from=entrypoint /distroless/ /
     COPY --from=file-system --chown=${APP_UID}:${APP_GID} /distroless/ /
@@ -99,7 +99,7 @@
 
 # :: MONITORING
   HEALTHCHECK --interval=5s --timeout=2s --start-period=5s \
-    CMD ["/usr/local/bin/curl", "-kLs", "--fail", "-o", "/dev/null", "http://localhost:3000/"]
+    CMD ["/usr/local/bin/localhealth", "http://127.0.0.1:3000/"]
 
 # :: EXECUTE
   USER ${APP_UID}:${APP_GID}
